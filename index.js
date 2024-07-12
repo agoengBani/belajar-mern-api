@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const multer = require("multer");
 const path = require("path");
+const cors = require("cors");
 
 const authRoutes = require("./src/routes/auth");
 const blogRoutes = require("./src/routes/blog");
@@ -36,13 +37,17 @@ app.use(bodyParser.json()); // type JSON
 app.use("/images", express.static(path.join(__dirname, "images"))); // supaya images bisa diakses
 app.use(multer({ storage: fileStorage, filter: fileFilter }).single("image"));
 
+const corsOption = {
+   origin: "http://localhost:3000",
+   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+   allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOption));
+app.use(express.json());
+
 app.use((req, res, next) => {
-   res.setHeader("Access-Control-Allow-Origin", "*");
-   res.setHeader(
-      "Access-Control-Allow-Methods",
-      "GET, POST, PUT, PATCH, DELETE, OPTIONS"
-   );
-   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+   console.log(`Incoming request: ${req.method} ${req.url}`);
    next();
 });
 
