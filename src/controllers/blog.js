@@ -49,8 +49,8 @@ exports.createBlogPost = (req, res, next) => {
 
 // get
 exports.getAllBlogPost = (req, res, next) => {
-   const currentPage = req.query.page || 1;
-   const perPage = req.query.perPage || 4;
+   const currentPage = parseInt(req.query.page) || 1;
+   const perPage = parseInt(req.query.perPage) || 4;
    let totalData;
 
    // panggil data dari db
@@ -58,36 +58,23 @@ exports.getAllBlogPost = (req, res, next) => {
       .countDocuments() // menghitung jumlah data yang dimiliki
       .then((count) => {
          totalData = count;
-         return (
-            BlogPost.find()
-               // buat agar menampilkan data sesuai kebutuhan client
-               .skip(parseInt(currentPage - 1) * parseInt(perPage)) // melewati beberapa data
-               .limit(parseInt(perPage)) // membatasi jumlah data yang ditampilkan
-         );
+         return BlogPost.find()
+            .skip((currentPage - 1) * perPage) // melewati beberapa data
+            .limit(perPage); // membatasi jumlah data yang ditampilkan
       })
       .then((result) => {
          res.status(200).json({
             message: "Data Blog Post Berhasil dipanggil",
             data: result,
             total_data: totalData,
-            per_page: parseInt(perPage),
-            current_page: parseInt(currentPage),
+            per_page: perPage,
+            current_page: currentPage,
+            total_page: Math.ceil(totalData / perPage),
          });
       })
       .catch((err) => {
          next(err);
       });
-
-   // BlogPost.find() // Memanggil seluruh data yang dimiliki di db
-   //    .then((result) => {
-   //       res.status(200).json({
-   //          message: "Data Blog Post Berhasil dipanggil",
-   //          data: result,
-   //       });
-   //    })
-   //    .catch((err) => {
-   //       next(err);
-   //    });
 };
 
 // mengambil blog post berdasarkan id
